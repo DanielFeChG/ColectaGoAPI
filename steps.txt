@@ -1,0 +1,229 @@
+1) Se inicializa el proytecto de Node.js (npm init --yes)
+2) Se instala Express (npm install express --save) 
+3) Se crea la carpeta src
+3) Se crean las carpetas 'models' y 'routes' dentro de 'src'
+4) Se crea el archivo index.js dentro de 'src'
+5) En el index se coloca lo siguiente:
+            const express = require('express')
+            const app = express()
+            const port = 3000
+
+            app.get('/', (req,res)=>{
+                res.send('HOLA MUNDO')
+
+            })
+
+            app.listen(port, () =>{
+                console.log('La aplicación se está ejecutando por el puerto ' + `${port}`)
+            })
+
+
+    donde: 
+            Línea 1: En este ejemplo se importa el módulo de express. 
+            Línea 2: Se crea la constante app para inicializar la aplicación bajo Express.
+            Línea 3: Se crea la constante port para especificar el número de puerto por el que se accederá a la aplicación.
+            Línea 5: Se utiliza la función get(…) para generar una petición HTTP de tipo GET indicando que la ruta de acceso a esa petición es la raíz del proyecto '/' 
+            Línea 6: Mediante el objeto res se llama a la función send(…) que permite enviar la información que se mostrará en el body de la respuesta.
+            Línea 10: se llama a la función listen(…) para establece la conexión bajo el puerto especificado en la constante port.
+6) Se instala nodemon (npm i -D nodemon)
+7) En el archivo package.json, en el grupo de escripts, se agrega lo siguiente: ("dev": "nodemon src/index.js")
+8) Se instala mongoose (npm i mongoose --save)
+    -> Para que se pueda acceder a la base de datos desde MongoDB se debe instalar el componente mongoose el cual provee los métodos para tal fin.
+9) Se instala dotenv (npm i dotenv --save)
+    -> Para no exponer los datos de conexión en cualquier archivo es mejor crear una variable de entorno dentro de la misma aplicación. Para crear variables de entorno personalizadas se utiliza el componente dotenv.
+10) En la carpeta madre se crea el archivo '.env'
+11) Se configura el '.env'
+    MONGODB_URI = mongodb+srv://root:<password>@cluster0.gvdabc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+    donde:
+        - Lo que va después del = es la URI de conexión que se copió anteriormente desde MongoDB Atlas.
+        - Recordar cambiar el <password> por la clave que se definió para el nuevo usuario en MongoDB Atlas, quitando incluso los < >
+12) Se crean los modelos dentro de la carpeta 'models'
+    Para crear un modelo de datos se utiliza la función Schema de mongoose.
+    EJ:
+        const mongoose = require("mongoose"); // importando el componente mogoose
+        const animalSchema = mongoose.Schema({
+          nombre: {
+            type: String,
+            required: true,
+          },
+          edad: {
+            type: Number,
+            required: true,
+          },
+          tipo: {
+            type: String,
+            required: true,
+          },
+          fecha: {
+            type: Date,
+            requiered: true,
+          }
+        });
+        module.exports = mongoose.model("Animal", animalSchema);
+13) Se crean los archivos routes dentro de la carpeta 'routes'
+    EJ:
+        const express = require("express");
+        const router = express.Router(); //manejador de rutas de express
+        const animalSchema = require("../models/animalModel");
+        
+        //Nuevo animal
+        router.post("/animals", (req, res) => {
+            const animal = animalSchema(req.body);
+            animal
+                .save()
+                .then((data) => res.json(data))
+                .catch((error) => res.json({ message: error }));
+        });
+        
+        module.exports = router;
+14) Se modifica el index
+        const parser = require("body-parser");
+        const express = require('express');
+        const app = express();
+        const port = 3000;
+        const animalRoutes = require("./routes/animalRoutes");
+        const mongoose = require("mongoose");
+        require('dotenv').config();
+        
+        app.use(parser.urlencoded({ extended: false })); //permite leer los datos que vienen en la petición
+        app.use(parser.json()); // transforma los datos a formato JSON
+        
+        //Gestión de las rutas usando el middleware
+        app.use("/api", animalRoutes);
+        app.use(express.json());
+        
+        //Conexión a la base de datos
+        mongoose
+            .connect(process.env.MONGODB_URI)
+            .then(() => console.log("Conexión exitosa"))
+            .catch((error) => console.log(error));
+        
+        //Conexión al puerto
+        app.listen(port, () => {
+            console.log(`Example app listening on port ${port}`)
+        });
+15) Se crean los metodos en los archivos routes
+    EJ:
+        -POST: Insersión en la base de datos
+
+            //Nuevo animal
+            router.post("/animals". (req,res) => {
+                const animal = animalSchema(req.body);
+                animal
+                    .save()
+                    .then((data) => res.json(data))
+                    .catch((error)) => res.json({ message: error}));
+            });
+
+        -GET: Consulta de datos
+
+            //Consultar todos los animales
+            router.get("/animals/all", (req, res) => {
+                animalSchema.find()
+                    .then((data) => res.json(data))
+                    .catch((error) => res.json({ message: error }));
+            });
+
+            //Consultar un animal por su id
+            router.get("/animals/:id", (req, res) => {
+                const { id } = req.params;
+                animalSchema
+                    .findById(id)
+                    .then((data) => res.json(data))
+                    .catch((error) => res.json({ message: error }));
+            });
+
+            //Consultar animal que tenga nombre Firulais
+            router.get("/animals/name", (req, res) => {
+                animalSchema.find({nombre: { $eq: "Firulais" } })
+                    .then((data) => res.json(data))
+                    .catch((error) => res.json({ message: error }));
+            });
+
+        -PUT: Modificación/actualización de datos por id
+
+            //Modificar el nombre de un animal por su id
+            router.put("/animals/:id", (req, res) => {
+                const { id } = req.params;
+                const { nombre, edad, tipo, fecha } = req.body;
+                animalSchema
+                    .updateOne({ _id: id }, {
+                        $set: { nombre, edad, tipo, fecha }
+                    })
+                    .then((data) => res.json(data))
+                    .catch((error) => res.json({ message: error }));
+            });
+
+        -DELETE: Eliminación de datos por id
+
+            //Eliminar un animal por su id
+            router.delete("/animals/:id", (req, res) => {
+                const { id } = req.params;
+                animalSchema
+                    .findByIdAndDelete(id)
+                    .then((data) => {
+                        res.json(data);
+                    })
+                    .catch((error) => {
+                        res.json({ message: error });
+                    });
+            });
+16) Se instala bcrypt (npm i bcrypt --save)
+17) Se crea el archivo 'user.js' en la carpeta 'models'
+    EJ:
+        const mongoose = require("mongoose"); // importando el componente mongoose
+        const bcrypt = require("bcrypt"); // importando el componente bcrypt
+        const userSchema = mongoose.Schema({
+            usuario: {
+                type: String,
+                required: true
+            },
+            correo: {
+                type: String,
+                required: true
+            },
+            clave: {
+                type: String,
+                required: true
+            }
+        });
+        
+        userSchema.methods.encryptClave = async(clave) => {
+            const salt = await bcrypt.genSalt(10);
+            return bcrypt.hash(clave, salt);
+        }
+        
+        module.exports = mongoose.model('User', userSchema);
+18) Se crea el archivo 'authentication.js' en la carpeta routes
+    EJ:
+        const express = require("express");
+        const router = express.Router(); //manejador de rutas de express
+        const userSchema = require("../models/user");
+        
+        router.post('/signup', async(req, res) => {
+            const { usuario, correo, clave } = req.body;
+            const user = new userSchema({
+                usuario: usuario,
+                correo: correo,
+                clave: clave
+            });
+            user.clave = await user.encryptClave(user.clave);
+            await user.save(); //save es un método de mongoose para guardar datos en MongoDB 
+            //res.json(user);
+            res.json({
+                message: "Usuario guardado."
+            });
+        });
+        
+        module.exports = router;
+19) En el archivo 'index.js' hacer un require para las rutas de autenticación y agregarlas con el método use como se hizo con los otros modelos
+    EJ: 
+        const animalRoutes = require......
+        ->AQUI const authRoutes = require("./routers/authentication)
+        
+
+        app.use("/api", animalRoutes);
+        ->AQUI app.use("/api", authRoutes);
+
+#) Para correr el proyecto (npm run dev)
+
