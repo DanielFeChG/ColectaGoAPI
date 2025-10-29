@@ -12,7 +12,7 @@ router.post('/signup', async (req, res) => {
         phone: phone,
         role, role
     });
-    user.clave = await user.encryptClave(user.clave);
+    user.clave = await user.encryptClave(user.password);
     await user.save(); //save es un método de mongoose para guardar datos en MongoDB 
     //res.json(user);
     res.json({ message: "Usuario guardado." });
@@ -22,7 +22,7 @@ module.exports = router;
 //inicio de sesión
 router.post("/login", async (req, res) => {
     // validaciones
-    const { error } = userSchema.validate(req.body.correo, req.body.clave);
+    const { error } = userSchema.validate(req.body.correo, req.body.password);
     if (error) return res.status(400).json({ error: error.details[0].message });
     //Buscando el usuario por su dirección de correo
     const user = await userSchema.findOne({ mail: req.body.mail });
