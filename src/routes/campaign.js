@@ -12,7 +12,10 @@ const upload = multer({
   },
 });
 
-router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req, res) => {
+router.post(
+  "/newCampaign",
+  upload.single("articlesOfIncorporation"),
+  async (req, res) => {
     try {
       //Primero se valida que el PDF quede obligatorio para subir
       if (!req.file)
@@ -67,39 +70,72 @@ router.get("/seeCampaigns", async (req, res) => {
   }
 });
 
-router.get("/seePDFCampaign/:id/pdf", async (req, res) => {//Se busca el PDF por el ID de la campaña
+router.get("/seePDFCampaign/:id/pdf", async (req, res) => {
+  //Se busca el PDF por el ID de la campaña
   try {
     const { id } = req.params;
-    const campaign = await campaignSchema.findById(id);//Se guarda la campaña en la constante
+    const campaign = await campaignSchema.findById(id); //Se guarda la campaña en la constante
 
     if (!campaign || !campaign.articlesOfIncorporation) {
-      return res.send("No se encontró el documento de constitución");//Se verifica que el PDF exista
+      return res.send("No se encontró el documento de constitución"); //Se verifica que el PDF exista
     }
 
-    const pdf = campaign.articlesOfIncorporation;//Se obtiene solo el PDF de la campaña
-    res.contentType(pdf.contentType || "application/pdf");//Se devuelve un archivo PDF almacenado en la BD en application/pdf
-    res.send(pdf.data);//Contenido binario
+    const pdf = campaign.articlesOfIncorporation; //Se obtiene solo el PDF de la campaña
+    res.contentType(pdf.contentType || "application/pdf"); //Se devuelve un archivo PDF almacenado en la BD en application/pdf
+    res.send(pdf.data); //Contenido binario
   } catch (e) {
     return res.json({ message: e.message });
   }
 });
 
-router.delete("/campaigns/:id", async (req, res) => {//Se elimina campaña de acuerdo a su ID
-    try {
-        const { id } = req.params;
-        const campaigns = await campaignSchema.findById(id).select(//Se guarda la campaña a eliminar en la constante sin el binario del PDF
-            "-articlesOfIncorporation.data" 
-            );
-        campaignSchema
-            .findByIdAndDelete(id)//Se elimina la campaña
-            .then((data) => {
-            res.json(campaigns);//Se muestra la campaña eliminada, pero sin el PDF para evitar desorden
-            })
-    } catch (error) {
+router.delete("/campaigns/:id", async (req, res) => {
+  //Se elimina campaña de acuerdo a su ID
+  try {
+    const { id } = req.params;
+    const campaigns = await campaignSchema.findById(id).select(
+      //Se guarda la campaña a eliminar en la constante sin el binario del PDF
+      "-articlesOfIncorporation.data"
+    );
+    campaignSchema
+      .findByIdAndDelete(id) //Se elimina la campaña
+      .then((data) => {
+        res.json(campaigns); //Se muestra la campaña eliminada, pero sin el PDF para evitar desorden
+      });
+  } catch (error) {
     res.json({ message: error.message });
-    }
+  }
 });
 
-//router.put()
+router.put("/updateCampaign/:id", upload.single("articlesOfIncorporation"), async (req, res) => {
+    const { id } = req.params;
+
+    const body = req.body || {};//Se guarda el body, inclusive si no está definido
+    const fields = [
+      "campaignName",
+      "crowdfounder",
+      "crowdfounderNIT",
+      "campaignObjectives",
+      "serviceOrProduct",
+    ];//Campos de texto del esquema
+    const update = {};
+
+    fields.forEach((field) => {
+      //Se recorre el array para de acuerdo con cada campo
+      if (Object.prototype.hasOwnProperty.call(body, field)) {
+        update[field] = body[field]; //El campo de la campaña debe ser el mismo que se quiera actualizar
+      }
+    });
+
+    const updated = await campaignSchema.findByIdAndUpdate(
+      id,
+      { $set: update },
+      { new: true, runValidators: true }
+    );
+
+    //If para verificar si la campaña se encuentra o no
+    if (!updated) return res.json({ message: "Campaña no encontrada" });
+
+    res.json({ok: true, id: updated._id, updated: Object.keys(update)});
+  });
 
 module.exports = router;
