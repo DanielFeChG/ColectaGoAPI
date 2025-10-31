@@ -1,5 +1,5 @@
 const mongoose = require("mongoose"); // importando el componente mogoose
-const campaignSchema = mongoose.Schema({
+const campaignSchema = new mongoose.Schema({
     campaignName: {
         type: String,
         required: true
@@ -13,11 +13,13 @@ const campaignSchema = mongoose.Schema({
         required: true
     },
     articlesOfIncorporation: {
-        data: Buffer,
-        contentType: { type: String, default: "application/pdf" },
-        filename: String,
-        size: Number,
-        uploadedAt: { type: Date, default: Date.now },
+        type: {
+            data: Buffer,
+            contentType: { type: String, default: "application/pdf" },
+            filename: String,
+            size: Number,
+            uploadedAt: { type: Date, default: Date.now },
+        },
         required: true
     },
     campaignObjectives: {
@@ -28,5 +30,5 @@ const campaignSchema = mongoose.Schema({
         type: String,
         required: true
     },
-});
+}, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
 module.exports = mongoose.model("Campaign", campaignSchema);
