@@ -12,44 +12,78 @@ const upload = multer({
   },
 });
 
-router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req, res) => {
+router.post(
+  "/newCampaign",
+  upload.single("articlesOfIncorporation"),
+  async (req, res) => {
     try {
-        const {
-            campaignName,
-            crowdfounder,
-            crowdfounderNIT,
-            campaignObjectives,
-            serviceOrProduct
-        } = req.body;
-
-        const pdf = req.file;
-        const articlesOfIncorporation = {
-            data: pdf.buffer,
-            contentType: pdf.mimetype,
-            filename: pdf.originalname,
-            size: pdf.size,
-            uploadedAt: new Date() //Fecha actual
-        };
-
-        const campaign = await campaignSchema.create({
-            campaignName,
-            crowdfounder,
-            crowdfounderNIT,
-            campaignObjectives,
-            serviceOrProduct,
-            articlesOfIncorporation
+      //Primero se valida que el PDF quede obligatorio para subir
+      if (!req.file)
+        return res.json({
+          message:
+            "Se debe adjuntar el PDF del acta de constitución de la empresa.",
         });
-        return res.json(data);
-    } catch(error) {
-        res.json({ message: error });//muestra mensaje de error
+
+      //Se solicitan los datos de texto
+      const {
+        campaignName,
+        crowdfounder,
+        crowdfounderNIT,
+        campaignObjectives,
+        serviceOrProduct,
+      } = req.body;
+
+      //Después, se solicita el archivo PDF
+      const pdf = req.file;
+      const articlesOfIncorporation = {
+        data: pdf.buffer,
+        contentType: pdf.mimetype,
+        filename: pdf.originalname,
+        size: pdf.size,
+        uploadedAt: new Date(), //Se asigna fecha actual
+      };
+
+      //Carga completa de información
+      const campaign = await campaignSchema.create({
+        campaignName,
+        crowdfounder,
+        crowdfounderNIT,
+        campaignObjectives,
+        serviceOrProduct,
+        articlesOfIncorporation,
+      });
+      return res.json({ ok: true, id: campaign._id }); //muestra ok y id de registro en la BD
+    } catch (error) {
+      res.json({ message: error }); //muestra mensaje de error
     }
+  }
+);
+
+router.get("/seeCampaigns", async (req, res) => {
+  try {
+    const campaigns = await campaignSchema.find().select(
+      "-articlesOfIncorporation.data" //Se evidencia error en el anterior get ya que muestra todo el binario del PDF, por lo que se excluye para que la respuesta no sea desordenada
+    );
+    res.json(campaigns);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
 });
 
-router.get("/seeCampaigns", (req, res) => {
-   animalSchema
-     .find()
-     .then((data) => res.json(data))
-     .catch((error) => res.json({ message: error }));
+router.delete("/campaigns/:id", async (req, res) => {//Se elimina campaña de acuerdo a su ID
+    try {
+        const { id } = req.params;
+        const campaigns = await campaignSchema.findById(id).select(//Se guarda la campaña a eliminar en la constante sin el binario del PDF
+            "-articlesOfIncorporation.data" 
+            );
+        campaignSchema
+            .findByIdAndDelete(id)//Se elimina la campaña
+            .then((data) => {
+            res.json(campaigns);//Se muestra la campaña eliminada, pero sin el PDF para evitar desorden
+            })
+    } catch (error) {
+    res.json({ message: error.message });
+    }
 });
 
 module.exports = router;
