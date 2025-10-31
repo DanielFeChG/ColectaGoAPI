@@ -12,10 +12,7 @@ const upload = multer({
   },
 });
 
-router.post(
-  "/newCampaign",
-  upload.single("articlesOfIncorporation"),
-  async (req, res) => {
+router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req, res) => {
     try {
       //Primero se valida que el PDF quede obligatorio para subir
       if (!req.file)
@@ -70,6 +67,23 @@ router.get("/seeCampaigns", async (req, res) => {
   }
 });
 
+router.get("/seePDFCampaign/:id/pdf", async (req, res) => {//Se busca el PDF por el ID de la campaña
+  try {
+    const { id } = req.params;
+    const campaign = await campaignSchema.findById(id);//Se guarda la campaña en la constante
+
+    if (!campaign || !campaign.articlesOfIncorporation) {
+      return res.send("No se encontró el documento de constitución");//Se verifica que el PDF exista
+    }
+
+    const pdf = campaign.articlesOfIncorporation;//Se obtiene solo el PDF de la campaña
+    res.contentType(pdf.contentType || "application/pdf");//Se devuelve un archivo PDF almacenado en la BD en application/pdf
+    res.send(pdf.data);//Contenido binario
+  } catch (e) {
+    return res.json({ message: e.message });
+  }
+});
+
 router.delete("/campaigns/:id", async (req, res) => {//Se elimina campaña de acuerdo a su ID
     try {
         const { id } = req.params;
@@ -85,5 +99,7 @@ router.delete("/campaigns/:id", async (req, res) => {//Se elimina campaña de ac
     res.json({ message: error.message });
     }
 });
+
+//router.put()
 
 module.exports = router;
