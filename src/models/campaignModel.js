@@ -31,7 +31,7 @@ const campaignSchema = new mongoose.Schema({
         required: true
     },
     collected: {
-        type: Number,
+        type: Schema.Types.Decimal128,
         default: 0,
         required: true
     },
