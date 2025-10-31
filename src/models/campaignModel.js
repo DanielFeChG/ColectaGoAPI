@@ -12,8 +12,12 @@ const campaignSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    documents: {
-        type: String,
+    articlesOfIncorporation: {
+        data: Buffer,
+        contentType: { type: String, default: "application/pdf" },
+        filename: String,
+        size: Number,
+        uploadedAt: { type: Date, default: Date.now },
         required: true
     },
     campaignObjectives: {
