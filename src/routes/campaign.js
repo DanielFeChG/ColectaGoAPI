@@ -107,35 +107,50 @@ router.delete("/campaigns/:id", async (req, res) => {
 });
 
 router.put("/updateCampaign/:id", upload.single("articlesOfIncorporation"), async (req, res) => {
-    const { id } = req.params;
+    try {
+      const { id } = req.params;
 
-    const body = req.body || {};//Se guarda el body, inclusive si no está definido
-    const fields = [
-      "campaignName",
-      "crowdfounder",
-      "crowdfounderNIT",
-      "campaignObjectives",
-      "serviceOrProduct",
-    ];//Campos de texto del esquema
-    const update = {};
+      const body = req.body || {}; //Se guarda el body, inclusive si no está definido
+      const fields = [
+        "campaignName",
+        "crowdfounder",
+        "crowdfounderNIT",
+        "campaignObjectives",
+        "serviceOrProduct",
+      ]; //Campos de texto del esquema
+      const update = {}; //Array que guarda el campo a actualizar
 
-    fields.forEach((field) => {
-      //Se recorre el array para de acuerdo con cada campo
-      if (Object.prototype.hasOwnProperty.call(body, field)) {
-        update[field] = body[field]; //El campo de la campaña debe ser el mismo que se quiera actualizar
+      fields.forEach((field) => {
+        //Se recorre el array para de acuerdo con cada campo
+        if (Object.prototype.hasOwnProperty.call(body, field)) {
+          update[field] = body[field]; //El campo de la campaña debe ser el mismo que se quiera actualizar
+        }
+      });
+
+      if (req.file) {
+        const file = req.file; //Actualización de documento PDF
+        update.articlesOfIncorporation = {
+          data: file.buffer,
+          contentType: file.mimetype,
+          filename: file.originalname?.replace(/"/g, ""),
+          size: file.size,
+          uploadedAt: new Date(),
+        };
       }
-    });
 
-    const updated = await campaignSchema.findByIdAndUpdate(
-      id,
-      { $set: update },
-      { new: true, runValidators: true }
-    );
+      const updated = await campaignSchema.findByIdAndUpdate(
+        id,
+        { $set: update }
+      );
 
-    //If para verificar si la campaña se encuentra o no
-    if (!updated) return res.json({ message: "Campaña no encontrada" });
+      //If para verificar si la campaña se encuentra o no
+      if (!updated) return res.json({ message: "Campaña no encontrada" });
 
-    res.json({ok: true, id: updated._id, updated: Object.keys(update)});
-  });
+      res.json({ ok: true, id: updated._id, updated: Object.keys(update) });
+    } catch (error) {
+      res.json({ message: error.message });
+    }
+  }
+);
 
 module.exports = router;
