@@ -12,10 +12,7 @@ const upload = multer({
   },
 });
 
-router.post(
-  "/newCampaign",
-  upload.single("articlesOfIncorporation"),
-  async (req, res) => {
+router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req, res) => {
     try {
       //Primero se valida que el PDF quede obligatorio para subir
       if (!req.file)

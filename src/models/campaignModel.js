@@ -30,5 +30,16 @@ const campaignSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    collected: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    activeOrInactive: {
+        type: String,
+        enum: ['activo', 'inactivo'],
+        default: "inactivo",
+        required: true
+    },
 }, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
 module.exports = mongoose.model("Campaign", campaignSchema);
