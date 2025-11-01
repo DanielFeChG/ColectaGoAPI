@@ -21,11 +21,18 @@ const investmentSchema = mongoose.Schema({
         enum: ["iniciado", "pagoPendiente", "confirmado", "fallido", "reembolsado"],
         default: "iniciado",
         index: true,
-    },
-    // payment: { 
-    //     type: ObjectId, 
-    //     ref: "Payment" 
-    // },
+    }
 }, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
+
+//Referencia virtual para visualizar la relación con Payment
+investmentSchema.virtual("payments", {
+  ref: "Payment",
+  localField: "_id",
+  foreignField: "investment",
+});
+
+//para que el virtual aparezca en JSON
+investmentSchema.set("toJSON", { virtuals: true });
+investmentSchema.set("toObject", { virtuals: true });
 
 module.exports = mongoose.model("Investment", investmentSchema);

@@ -28,4 +28,4 @@ const paymentSchema = mongoose.Schema({
     },
 }, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
 
-module.exports = mongoose.model("Payment", investmentSchema);
+module.exports = mongoose.model("Payment", paymentSchema);

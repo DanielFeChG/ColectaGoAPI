@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router(); //manejador de rutas de express para manejarlas
 const User = require("../models/userModel");
 const investmentSchema = require("../models/investmentModel"); //Ruta del modelo de inversión
+require("../models/paymentModel");//Ruta del modelo de pagos
 
 router.post("/invest", async (req, res) => {
   try {
@@ -26,8 +27,7 @@ router.post("/invest", async (req, res) => {
     const invest = await investmentSchema.create({
       campaign,
       investor,
-      amount,
-      //payment,
+      amount
     });
 
     return res.json({ ok: true, id: invest._id }); //muestra ok y id de registro en la BD
@@ -43,7 +43,11 @@ router.get("/investments/all", async (req, res) => {
       .find()
       .populate("campaign", "campaignName activeOrInactive owner")//Muestra el nombre de la campaña, estado y propietario de la campaña
       .populate("investor", "userName mail")//Muestra el userName y mail del inversionista
-      .lean();
+      .populate({
+        path: "payments",//Información virtual del pago
+        select: "provider amount status createdAt"
+      })
+      .lean({ virtuals: true });
 
     res.json({ ok: true, total: investments.length, investments });
   } catch (error) {
@@ -61,7 +65,11 @@ router.get("/investments/investor/:investorId", async (req, res) => {
     const investments = await investmentSchema
       .find({ investor: investorId })
       .populate("campaign", "campaignName activeOrInactive owner")//Muestra el nombre de la campaña, estado y propietario de la campaña
-      .lean();
+      .populate({
+        path: "payments",//Información virtual del pago
+        select: "provider amount status createdAt"
+      })
+      .lean({ virtuals: true });
 
     res.json({ ok: true, total: investments.length, investments });
   } catch (error) {
@@ -79,7 +87,11 @@ router.get("/investments/campaign/:campaignId", async (req, res) => {
     const investments = await investmentSchema
       .find({ campaign: campaignId })
       .populate("investor", "userName mail")//Muestra el userName y mail del inversionista
-      .lean();
+      .populate({
+        path: "payments",//Información virtual del pago
+        select: "provider amount status createdAt"
+      })
+      .lean({ virtuals: true });
 
     res.json({ ok: true, total: investments.length, investments });
   } catch (error) {
