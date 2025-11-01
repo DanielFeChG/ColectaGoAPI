@@ -5,12 +5,12 @@ const router = express.Router();
 const userSchema = require("../models/userModel");
 const Crowdfounder = require("../models/crowdfounderModel");
 const Investor = require("../models/investorModel");
-//const Administrator = require("../models/adminModel");
+const Administrator = require("../models/adminModel");
 
-//registrar usuario
+//------------------------------ REGISTRO DE USUARIO --------------------------------------
 router.post('/signup', async (req, res) => {
     try {
-        const { userName, mail, password, country, phone, role, bio, organization, website, verified, rating, followers, campaigns, balance, investedAmount, investmentCount, inversiones } = req.body;
+        const { userName, mail, password, country, phone, role, bio, organization, website, verified, rating, followers, campaigns, balance, investedAmount, investmentCount, inversiones, permissions } = req.body;
 
         // Crear usuario según el rol
         if (role === "crowdfounder") {
@@ -29,7 +29,7 @@ router.post('/signup', async (req, res) => {
                 followers,
                 campaigns
             });
-        } else if (role === "investor") {
+        } else if (role === "inversionista") {
             newUser = new Investor({
                 userName,
                 mail,
@@ -43,15 +43,16 @@ router.post('/signup', async (req, res) => {
                 inversiones,
                 rating
             });
-            // } else if (role === "administrador") {
-            //     newUser = new Administrator({
-            //         userName,
-            //         mail,
-            //         password: hashedPassword,
-            //         country,
-            //         phone,
-            //         role
-            //     }); 
+        } else if (role === "administrador") {
+            newUser = new Administrator({
+                userName,
+                mail,
+                password,
+                country,
+                phone,
+                role,
+                permissions
+            });
         } else {
             return res.status(400).json({ error: "Rol no válido" });
         }
@@ -69,9 +70,7 @@ router.post('/signup', async (req, res) => {
 });
 module.exports = router;
 
-//-----------------------------------------------------------------
-
-//inicio de sesión
+//---------------------------- INICIO DE SESION ----------------------------------------
 router.post("/login", async (req, res) => {
     const { error } = userSchema.validate(req.body.mail, req.body.password);
     if (error) return res.status(400).json({ error: error.details[0].message });
@@ -89,6 +88,7 @@ router.post("/login", async (req, res) => {
         data: "Bienvenido(a)",
     });
 });
+
 
 // Ruta para obtener todos los usuarios (TEMPORAL)
 router.get("/users", async (req, res) => {

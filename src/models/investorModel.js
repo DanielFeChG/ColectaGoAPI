@@ -46,5 +46,5 @@ const investorSchema = new mongoose.Schema({
     }
 });
 
-const Investor = User.discriminator("investor", investorSchema);
+const Investor = User.discriminator("inversionista", investorSchema);
 module.exports = Investor;
