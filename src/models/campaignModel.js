@@ -1,5 +1,10 @@
 const mongoose = require("mongoose"); // importando el componente mogoose
 const campaignSchema = new mongoose.Schema({
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     campaignName: {
         type: String,
         required: true

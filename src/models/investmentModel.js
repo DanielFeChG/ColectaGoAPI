@@ -1,19 +1,19 @@
 const mongoose = require("mongoose"); // importando el componente mogoose
 const investmentSchema = mongoose.Schema({
     campaign: {
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Campaign",
         index: true,
         required: true,
     },
     investor: { 
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         index: true, 
         required: true 
     },
     amount: { 
-        type: Schema.Types.Decimal128, 
+        type: Number, 
         required: true 
     },
     status: {
@@ -22,10 +22,10 @@ const investmentSchema = mongoose.Schema({
         default: "iniciado",
         index: true,
     },
-    payment: { 
-        type: ObjectId, 
-        ref: "Payment" 
-    },
+    // payment: { 
+    //     type: ObjectId, 
+    //     ref: "Payment" 
+    // },
 });
 
 module.exports = mongoose.model("Investment", investmentSchema);
