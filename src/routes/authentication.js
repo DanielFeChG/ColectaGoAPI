@@ -4,62 +4,64 @@ const router = express.Router();
 
 const userSchema = require("../models/userModel");
 const Crowdfounder = require("../models/crowdfounderModel");
-//const Investor = require("../models/investorModel");
+const Investor = require("../models/investorModel");
 //const Administrator = require("../models/adminModel");
 
 //registrar usuario
 router.post('/signup', async (req, res) => {
-    try{
-    const { userName, mail, password, country, phone, role, bio, organization, website, verified, rating, followers, campaigns} = req.body;
+    try {
+        const { userName, mail, password, country, phone, role, bio, organization, website, verified, rating, followers, campaigns, balance, investedAmount, investmentCount, inversiones } = req.body;
 
-    // Crear usuario según el rol
-    if (role === "crowdfounder") {
-        newUser = new Crowdfounder({
-            userName,
-            mail,
-            password,
-            country,
-            phone,
-            role,
-            bio,
-            organization,
-            website,
-            verified,
-            rating,
-            followers,
-            campaigns
-        });
-    } //else if (role === "inversionista") {
-        //newUser = new Investor({
-            //userName,
-            //mail,
-            //password: hashedPassword,
-            //country,
-            //phone,
-            //role,
-            //balance,
-            //inversiones
-        //});
-    // } else if (role === "administrador") {
-    //     newUser = new Administrator({
-    //         userName,
-    //         mail,
-    //         password: hashedPassword,
-    //         country,
-    //         phone,
-    //         role
-    //     });
-    //} 
-    else {
-        return res.status(400).json({ error: "Rol no válido" });
-    }
+        // Crear usuario según el rol
+        if (role === "crowdfounder") {
+            newUser = new Crowdfounder({
+                userName,
+                mail,
+                password,
+                country,
+                phone,
+                role,
+                bio,
+                organization,
+                website,
+                verified,
+                rating,
+                followers,
+                campaigns
+            });
+        } else if (role === "investor") {
+            newUser = new Investor({
+                userName,
+                mail,
+                password,
+                country,
+                phone,
+                role,
+                balance,
+                investedAmount,
+                investmentCount,
+                inversiones,
+                rating
+            });
+            // } else if (role === "administrador") {
+            //     newUser = new Administrator({
+            //         userName,
+            //         mail,
+            //         password: hashedPassword,
+            //         country,
+            //         phone,
+            //         role
+            //     }); 
+        } else {
+            return res.status(400).json({ error: "Rol no válido" });
+        }
 
-    //Encriptar la contraseña
-    newUser.password = await newUser.encryptClave(newUser.password);
+        //Encriptar la contraseña
+        newUser.password = await newUser.encryptClave(newUser.password);
 
-    //Guarda la data
-    await newUser.save();
-    res.json({ message: "Usuario registrado." });
+        //Guarda la data
+        await newUser.save();
+        res.json({ message: "Usuario registrado." });
     } catch (error) {
         console.error("Error en /signup:", error);
         res.status(500).json({ error: "Error al registrar el usuario." });
