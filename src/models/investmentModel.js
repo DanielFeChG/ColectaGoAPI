@@ -26,6 +26,6 @@ const investmentSchema = mongoose.Schema({
     //     type: ObjectId, 
     //     ref: "Payment" 
     // },
-});
+}, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
 
 module.exports = mongoose.model("Investment", investmentSchema);
