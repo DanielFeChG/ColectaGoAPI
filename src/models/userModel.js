@@ -1,5 +1,7 @@
 const mongoose = require("mongoose"); // importando el componente mongoose
 const bcrypt = require("bcrypt"); // importando el componente bcrypt
+const options = { discriminatorKey: "role", collection: "users" };
+
 const userSchema = mongoose.Schema({
     userName: {
         type: String,
@@ -7,7 +9,8 @@ const userSchema = mongoose.Schema({
     },
     mail: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -26,7 +29,9 @@ const userSchema = mongoose.Schema({
         enum: ['crowdfounder', 'inversionista', 'administrador'],
         required: true,
   },
-});
+}, options);
+
+    
 userSchema.methods.encryptClave = async (password) => {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);

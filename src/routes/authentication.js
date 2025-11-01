@@ -1,32 +1,81 @@
 const bcrypt = require("bcrypt");
 const express = require("express");
-const router = express.Router(); //manejador de rutas de express
+const router = express.Router();
+
 const userSchema = require("../models/userModel");
+const Crowdfounder = require("../models/crowdfounderModel");
+//const Investor = require("../models/investorModel");
+//const Administrator = require("../models/adminModel");
+
+//registrar usuario
 router.post('/signup', async (req, res) => {
-    const { userName, mail, password, country, phone, role} = req.body;
-    const user = new userSchema({
-        userName: userName,
-        mail: mail,
-        password: password,
-        country: country,
-        phone: phone,
-        role, role
-    });
-    user.password = await user.encryptClave(user.password);
-    await user.save(); //save es un método de mongoose para guardar datos en MongoDB 
-    //res.json(user);
-    res.json({ message: "Usuario guardado." });
+    try{
+    const { userName, mail, password, country, phone, role, bio, organization, website, verified, rating, followers, campaigns} = req.body;
+
+    // Crear usuario según el rol
+    if (role === "crowdfounder") {
+        newUser = new Crowdfounder({
+            userName,
+            mail,
+            password,
+            country,
+            phone,
+            role,
+            bio,
+            organization,
+            website,
+            verified,
+            rating,
+            followers,
+            campaigns
+        });
+    } //else if (role === "inversionista") {
+        //newUser = new Investor({
+            //userName,
+            //mail,
+            //password: hashedPassword,
+            //country,
+            //phone,
+            //role,
+            //balance,
+            //inversiones
+        //});
+    // } else if (role === "administrador") {
+    //     newUser = new Administrator({
+    //         userName,
+    //         mail,
+    //         password: hashedPassword,
+    //         country,
+    //         phone,
+    //         role
+    //     });
+    //} 
+    else {
+        return res.status(400).json({ error: "Rol no válido" });
+    }
+
+    //Encriptar la contraseña
+    newUser.password = await newUser.encryptClave(newUser.password);
+
+    //Guarda la data
+    await newUser.save();
+    res.json({ message: "Usuario registrado." });
+    } catch (error) {
+        console.error("Error en /signup:", error);
+        res.status(500).json({ error: "Error al registrar el usuario." });
+    }
 });
 module.exports = router;
 
+//-----------------------------------------------------------------
+
 //inicio de sesión
 router.post("/login", async (req, res) => {
-    // validaciones
     const { error } = userSchema.validate(req.body.mail, req.body.password);
     if (error) return res.status(400).json({ error: error.details[0].message });
-    //Buscando el usuario por su dirección de correo
+    //Busca el usuario por su dirección de correo
     const user = await userSchema.findOne({ mail: req.body.mail });
-    //validando si no se encuentra
+    //valida si no se encuentra
     if (!user) return res.status(400).json({ error: "Usuario no encontrado" });
     //Transformando la contraseña a su valor original para 
     //compararla con la clave que se ingresa en el inicio de sesión
@@ -39,17 +88,15 @@ router.post("/login", async (req, res) => {
     });
 });
 
-
-// Ruta para obtener todos los usuarios
+// Ruta para obtener todos los usuarios (TEMPORAL)
 router.get("/users", async (req, res) => {
     try {
-        // Obtener todos los usuarios, pero excluyendo el campo "password"
-        const users = await userSchema.find({}, { password: 0 }); // El campo "password" no será devuelto
+        // Obtener todos los usuarios
+        const users = await userSchema.find();
 
         if (!users || users.length === 0) {
             return res.status(404).json({ error: "No se encontraron usuarios" });
         }
-
         // Enviar la lista de usuarios
         res.json({ users });
     } catch (error) {
@@ -58,8 +105,7 @@ router.get("/users", async (req, res) => {
     }
 });
 
-
-// Ruta para eliminar todos los usuarios
+// Ruta para eliminar todos los usuarios (TEMPORAL)
 router.delete("/users", async (req, res) => {
     try {
         // Eliminar todos los usuarios de la base de datos
