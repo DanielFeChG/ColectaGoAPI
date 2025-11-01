@@ -68,7 +68,6 @@ router.post('/signup', async (req, res) => {
         res.status(500).json({ error: "Error al registrar el usuario." });
     }
 });
-module.exports = router;
 
 //---------------------------- INICIO DE SESION ----------------------------------------
 router.post("/login", async (req, res) => {
@@ -124,3 +123,6 @@ router.delete("/users", async (req, res) => {
         res.status(500).json({ error: "Hubo un problema al eliminar los usuarios" });
     }
 });
+
+
+module.exports = router;

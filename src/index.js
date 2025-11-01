@@ -5,6 +5,7 @@ const port = 3000;
 const authRoutes = require("./routes/authentication.js");
 const campaignRoutes = require("./routes/campaign.js");
 const investmentRoutes = require("./routes/investment.js");
+const userRoutes = require("./routes/user.js");
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -15,6 +16,7 @@ app.use(parser.json()); // transforma los datos a formato JSON
 app.use("/api", authRoutes);
 app.use("/api", campaignRoutes);
 app.use("/api", investmentRoutes);
+app.use("/api", userRoutes);
 
 app.use(express.json());
 
