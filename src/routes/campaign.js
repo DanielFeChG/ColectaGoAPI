@@ -23,9 +23,10 @@ router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req
 
       //Se solicitan los datos de texto
       const {
+        owner,
         campaignName,
-        crowdfounder,
-        crowdfounderNIT,
+        crowdfunder,
+        crowdfunderNIT,
         campaignObjectives,
         serviceOrProduct,
       } = req.body;
@@ -42,9 +43,10 @@ router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req
 
       //Carga completa de información
       const campaign = await campaignSchema.create({
+        owner,
         campaignName,
-        crowdfounder,
-        crowdfounderNIT,
+        crowdfunder,
+        crowdfunderNIT,
         campaignObjectives,
         serviceOrProduct,
         articlesOfIncorporation,
@@ -58,9 +60,12 @@ router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req
 
 router.get("/seeCampaigns", async (req, res) => {
   try {
-    const campaigns = await campaignSchema.find().select(
+    const campaigns = await campaignSchema
+    .find()
+    .select(
       "-articlesOfIncorporation.data" //Se evidencia error en el anterior get ya que muestra todo el binario del PDF, por lo que se excluye para que la respuesta no sea desordenada
-    );
+    )
+    .populate("owner", "userName");
     res.json(campaigns);
   } catch (error) {
     res.json({ message: error.message });
@@ -109,9 +114,10 @@ router.put("/updateCampaign/:id", upload.single("articlesOfIncorporation"), asyn
 
       const body = req.body || {}; //Se guarda el body, inclusive si no está definido
       const fields = [
+        "owner",
         "campaignName",
-        "crowdfounder",
-        "crowdfounderNIT",
+        "crowdfunder",
+        "crowdfunderNIT",
         "campaignObjectives",
         "serviceOrProduct",
       ]; //Campos de texto del esquema

@@ -9,11 +9,11 @@ const campaignSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    crowdfounder: {
+    crowdfunder: {
         type: String,
         required: true
     },
-    crowdfounderNIT: {
+    crowdfunderNIT: {
         type: String,
         required: true
     },

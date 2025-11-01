@@ -4,6 +4,7 @@ const app = express();
 const port = 3000;
 const authRoutes = require("./routes/authentication.js");
 const campaignRoutes = require("./routes/campaign.js");
+const investmentRoutes = require("./routes/investment.js");
 
 const mongoose = require("mongoose");
 require('dotenv').config();
@@ -13,6 +14,7 @@ app.use(parser.json()); // transforma los datos a formato JSON
 //Gestión de las rutas usando el middleware
 app.use("/api", authRoutes);
 app.use("/api", campaignRoutes);
+app.use("/api", investmentRoutes);
 
 app.use(express.json());
 
