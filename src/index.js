@@ -6,19 +6,21 @@ const authRoutes = require("./routes/authentication.js");
 const campaignRoutes = require("./routes/campaign.js");
 const investmentRoutes = require("./routes/investment.js");
 const userRoutes = require("./routes/user.js");
+const paymentRoutes = require("./routes/payment.js");
 
 const mongoose = require("mongoose");
 require('dotenv').config();
 app.use(parser.urlencoded({ extended: false })); //permite leer los datos que vienen en la petición
 app.use(parser.json()); // transforma los datos a formato JSON
 
+app.use(express.json());
+
 //Gestión de las rutas usando el middleware
 app.use("/api", authRoutes);
 app.use("/api", campaignRoutes);
 app.use("/api", investmentRoutes);
 app.use("/api", userRoutes);
-
-app.use(express.json());
+app.use("/api", paymentRoutes);
 
 //Conexión a la base de datos
 mongoose

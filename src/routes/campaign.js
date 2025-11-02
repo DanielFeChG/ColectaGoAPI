@@ -83,7 +83,7 @@ router.get("/seeCampaigns", async (req, res) => {
         "-articlesOfIncorporation.data" //Se evidencia error en el anterior get ya que muestra todo el binario del PDF, por lo que se excluye para que la respuesta no sea desordenada
       )
       .populate("owner", "userName");
-    res.json(campaigns);
+    res.json({ ok: true, total: campaigns.length, campaigns });
   } catch (error) {
     res.json({ message: error.message });
   }

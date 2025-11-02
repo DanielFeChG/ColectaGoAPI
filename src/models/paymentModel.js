@@ -22,8 +22,8 @@ const paymentSchema = mongoose.Schema({
     },
     status: { 
         type: String, 
-        enum: ["creado","en_proceso","confirmado","fallido","devolucion"], 
-        default: "creado", 
+        enum: ["iniciado", "pagoPendiente", "confirmado", "fallido", "reembolsado"], 
+        default: "iniciado", 
         index: true 
     },
 }, { timestamps: true });//permite guardar la fecha de creación y actualización automáticamente
