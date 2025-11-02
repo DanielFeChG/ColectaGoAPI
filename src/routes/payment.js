@@ -109,6 +109,11 @@ router.put("/payments/:paymentId", async (req, res) => {
 
     //Si el estado cambió, se actualiza la inversión
     if (status == "pagoPendiente") {
+      await paymentSchema.findByIdAndUpdate(
+          paymentId,
+          { status: "pagoPendiente" },
+          { new: true }
+        );
       await investmentSchema.findByIdAndUpdate(
         payment.investment,
         { status: "pagoPendiente" },
@@ -140,19 +145,29 @@ router.put("/payments/:paymentId", async (req, res) => {
             { $inc: { "investmentCount": investment.amount } }
         );
     } else if (status == "fallido") {
+      await paymentSchema.findByIdAndUpdate(
+          paymentId,
+          { status: "fallido" },
+          { new: true }
+        );
       await investmentSchema.findByIdAndUpdate(
         payment.investment,
         { status: "fallido" },
         { new: true }
       );
     } else if (status == "reembolsado") {
+      await paymentSchema.findByIdAndUpdate(
+          paymentId,
+          { status: "reembolsado" },
+          { new: true }
+        );
       await investmentSchema.findByIdAndUpdate(
         payment.investment,
         { status: "reembolsado" },
         { new: true }
       );
     } else {
-      res.json({ok: false, message: "no funciona" });
+      res.json({ok: false, message: "No permitido" });
     }
 
     res.json({ ok: true, payment });
