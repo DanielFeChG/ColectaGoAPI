@@ -90,7 +90,7 @@ router.put("/payments/:paymentId", async (req, res) => {
       return res.json({ ok: false, message: "Falta el ID del pago" });//Se valida que se haya ingresado el ID del pago
     }
 
-    const validStatus = ["iniciado", "pagoPendiente", "confirmado", "fallido", "reembolsado"];
+    const validStatus = ["pagoPendiente", "confirmado", "fallido", "reembolsado"];
     if (status && !validStatus.includes(status)) {
       return res.json({ ok: false, message: `Estado inválido. Usa: ${validStatus.join(", ")}` });//Se valida que el estado a colocar esté en el listado
     }
@@ -115,6 +115,11 @@ router.put("/payments/:paymentId", async (req, res) => {
         { new: true }
       );
     } else if (status == "confirmado") {
+        await paymentSchema.findByIdAndUpdate(
+          paymentId,
+          { status: "confirmado" },
+          { new: true }
+        );
         await investmentSchema.findByIdAndUpdate(
             investment,
             { status: "confirmado" },
@@ -130,7 +135,6 @@ router.put("/payments/:paymentId", async (req, res) => {
             { _id: investment.investor },
             { $inc: { "investedAmount": investment.investor.investmentCount++ } }
         );
-        //Se suma el monto al inversionista
         await User.updateOne(
             { _id: investment.investor },
             { $inc: { "investmentCount": investment.amount } }
@@ -147,7 +151,9 @@ router.put("/payments/:paymentId", async (req, res) => {
         { status: "reembolsado" },
         { new: true }
       );
-    } 
+    } else {
+      res.json({ok: false, message: "no funciona" });
+    }
 
     res.json({ ok: true, payment });
   } catch (error) {
