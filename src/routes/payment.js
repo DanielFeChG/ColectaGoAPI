@@ -31,7 +31,7 @@ router.post("/payments/:investmentId", async (req, res) => {
     
     const [campaignDoc, investorDoc] = await Promise.all([
         Campaign.findById(investment.campaign).select("campaignName collected").lean(),
-        User.findById(investment.investor).select("userName investedAmount").lean(),
+        User.findById(investment.investor).select("userName investedAmount investmentCount").lean(),
     ]);
 
     const campaignName = campaignDoc.campaignName;
@@ -128,7 +128,12 @@ router.put("/payments/:paymentId", async (req, res) => {
         //Se suma el monto al inversionista
         await User.updateOne(
             { _id: investment.investor },
-            { $inc: { "investedAmount": investment.amount } }
+            { $inc: { "investedAmount": investment.investor.investmentCount++ } }
+        );
+        //Se suma el monto al inversionista
+        await User.updateOne(
+            { _id: investment.investor },
+            { $inc: { "investmentCount": investment.amount } }
         );
     } else if (status == "fallido") {
       await investmentSchema.findByIdAndUpdate(

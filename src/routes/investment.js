@@ -162,7 +162,7 @@ router.put("/investments/:id", async (req, res) => {
   }
 });
 
-router.delete("/investments/:id", async (req, res) => {
+router.delete("/deleteInvestments/:id", async (req, res) => {
   try {
     const { adminId } = req.query;
     if (!adminId) {
