@@ -1,0 +1,1 @@
+{"ok":true,"investment":{"_id":"6907cff9812610dcac182f16","campaign":{"_id":"6906c80438de1aa9134eee19","campaignName":"Cambio de nombre por prueba"},"investor":{"_id":"6906c46fc08eeb86b974ec62","userName":"inversionistaPrueba"},"amount":2000,"status":"iniciado","createdAt":"2025-11-02T21:41:14.001Z","updatedAt":"2025-11-02T21:45:45.230Z","__v":0,"id":"6907cff9812610dcac182f16"}}
