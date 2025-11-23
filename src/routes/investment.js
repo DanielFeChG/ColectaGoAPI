@@ -53,7 +53,7 @@ router.post("/invest", async (req, res) => {
 });
 
 //Visualización de todas las inversiones discriminada por campaña (para usuario administrador)
-router.get("/investments/all", async (req, res) => {
+router.get("/all", async (req, res) => {
   try {
     const { adminId } = req.query;
     if (!adminId) {
@@ -76,7 +76,7 @@ router.get("/investments/all", async (req, res) => {
 });
 
 //Visualización de todas las inversiones realizadas por el usuario inversionista (se realiza búsqueda por su ID)
-router.get("/investments/investor/:investorId", async (req, res) => {
+router.get("/investor/:investorId", async (req, res) => {
   try {
     const { investorId } = req.params;
     if (!investorId) {
@@ -98,7 +98,7 @@ router.get("/investments/investor/:investorId", async (req, res) => {
 });
 
 //Visualización de todas las inversiones realizadas a la campaña (se realiza búsqueda por su ID)
-router.get("/investments/campaign/:campaignId", async (req, res) => {
+router.get("/campaign/:campaignId", async (req, res) => {
   try {
     const { campaignId } = req.params;
     if (!campaignId) {
@@ -120,7 +120,7 @@ router.get("/investments/campaign/:campaignId", async (req, res) => {
 });
 
 //Sólo los administradores pueden realizar actualizaciones en las inversiones
-router.put("/investments/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { adminId } = req.query;

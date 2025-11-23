@@ -5,7 +5,7 @@ const paymentSchema = require("../models/paymentModel"); //Ruta del modelo de pa
 const Campaign = require("../models/campaignModel"); //Ruta del modelo de campaña
 const User = require("../models/userModel");
 
-router.post("/payments/:investmentId", async (req, res) => {
+router.post("/:investmentId", async (req, res) => {
   try {
     const { investmentId } = req.params;
 
@@ -58,7 +58,7 @@ router.post("/payments/:investmentId", async (req, res) => {
 });
 
 //Visualización de todos los pagos discriminado por inversion (para usuario administrador)
-router.get("/payments/all", async (req, res) => {
+router.get("/all", async (req, res) => {
   try {
     const { adminId } = req.query;
     if (!adminId) {
@@ -82,7 +82,7 @@ router.get("/payments/all", async (req, res) => {
   }
 });
 
-router.put("/payments/:paymentId", async (req, res) => {
+router.put("/:paymentId", async (req, res) => {
   try {
     const { paymentId } = req.params;
     const { status } = req.body;

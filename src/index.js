@@ -17,10 +17,10 @@ app.use(express.json());
 
 //Gestión de las rutas usando el middleware
 app.use("/api", authRoutes);
-app.use("/api", campaignRoutes);
-app.use("/api", investmentRoutes);
+app.use("/api/campaigns", campaignRoutes);
+app.use("/api/investments", investmentRoutes);
 app.use("/api", userRoutes);
-app.use("/api", paymentRoutes);
+app.use("/api/payments", paymentRoutes);
 
 //Conexión a la base de datos
 mongoose
