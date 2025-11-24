@@ -5,6 +5,8 @@ const router = express.Router();
 const userSchema = require("../models/userModel");
 const Crowdfounder = require("../models/crowdfounderModel");
 const Investor = require("../models/investorModel");
+const jwt = require('jsonwebtoken');
+
 const Administrator = require("../models/adminModel");
 
 //------------------------------ REGISTRO DE USUARIO --------------------------------------
@@ -70,22 +72,47 @@ router.post('/signup', async (req, res) => {
 });
 
 //---------------------------- INICIO DE SESION ----------------------------------------
-router.post("/login", async (req, res) => {
-    const { error } = userSchema.validate(req.body.mail, req.body.password);
-    if (error) return res.status(400).json({ error: error.details[0].message });
-    //Busca el usuario por su dirección de correo
-    const user = await userSchema.findOne({ mail: req.body.mail });
-    //valida si no se encuentra
-    if (!user) return res.status(400).json({ error: "Usuario no encontrado" });
-    //Transformando la contraseña a su valor original para 
-    //compararla con la clave que se ingresa en el inicio de sesión
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
-    if (!validPassword)
-        return res.status(400).json({ error: "Clave no válida" });
+router.post('/login', async (req, res) => {
+  try {
+    const { mail, password } = req.body;
+
+    // 1. Buscar usuario por mail
+    const user = await userSchema.findOne({ mail });
+    if (!user) {
+      return res.json({ ok: false, message: 'Usuario no encontrado' });
+    }
+
+    // 2. Comparar contraseña con bcrypt
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.json({ ok: false, message: 'Contraseña incorrecta' });
+    }
+
+    // 3. Generar token JWT
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // 4. Devolver token + usuario
     res.json({
-        error: null,
-        data: "Bienvenido(a)",
+      ok: true,
+      token,
+      user: {
+        _id: user._id,
+        userName: user.userName,
+        mail: user.mail,
+        country: user.country,
+        phone: user.phone,
+        role: user.role,
+      }
     });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Error en el servidor' });
+  }
 });
 
 

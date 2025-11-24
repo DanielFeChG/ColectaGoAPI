@@ -30,6 +30,10 @@ router.post("/invest", async (req, res) => {
         return res.json({ ok: false, message: "El monto debe ser mayor a 0" });
     }
 
+    if (campaign.activeOrInactive !== "activo") {
+      return res.json({ok: false, message: "No se pueden hacer inversiones en campañas inactivas."});
+    }
+
     const camp = await Campaign.findById(campaign);
     if (!camp) {
       return res.json({ ok: false, message: "Campaña no encontrada" });

@@ -108,7 +108,7 @@ router.get("/seePDFCampaign/:id/pdf", async (req, res) => {
 });
 
 //Se elimina campaña de acuerdo a su ID
-router.delete("/campaigns/:id", async (req, res) => {
+router.delete("/deleteCampaign/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { adminId } = req.query;
@@ -141,7 +141,7 @@ router.delete("/campaigns/:id", async (req, res) => {
   }
 });
 
-//Se actualiza campaña de acuerdo con su ID
+//Se actualiza campaña de acuerdo con su ID. Solo el admin puede cambiar la informacion
 router.put("/updateCampaign/:id", upload.single("articlesOfIncorporation"),async (req, res) => {
   try {
     const { id } = req.params;
@@ -162,6 +162,7 @@ router.put("/updateCampaign/:id", upload.single("articlesOfIncorporation"),async
       "NIT",
       "campaignObjectives",
       "serviceOrProduct",
+      "activeOrInactive"
     ]; //Campos de texto del esquema que se pueden actualizar
     const update = {}; //Array que guarda el campo a actualizar
 
