@@ -71,7 +71,7 @@ router.post("/newCampaign", upload.single("articlesOfIncorporation"), async (req
     });
     return res.json({ ok: true, id: campaign._id }); //muestra ok y id de registro en la BD
   } catch (error) {
-    res.json({ message: error }); //muestra mensaje de error
+    res.json({ message: 'No fue posible crear la campaña' }); //muestra mensaje de error
   }
 });
 

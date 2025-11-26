@@ -64,10 +64,10 @@ router.post('/signup', async (req, res) => {
 
         //Guarda la data
         await newUser.save();
-        res.json({ message: "Usuario registrado." });
+        res.json({ ok: true, message: "Usuario registrado." });
     } catch (error) {
         console.error("Error en /signup:", error);
-        res.status(500).json({ error: "Error al registrar el usuario." });
+        res.status(500).json({ ok: false, message: "Error al registrar el usuario." });
     }
 });
 
@@ -98,7 +98,9 @@ router.post('/login', async (req, res) => {
     // 4. Devolver token + usuario
     res.json({
       ok: true,
+      message: 'Login exitoso',
       token,
+      expiresIn: 3600,
       user: {
         _id: user._id,
         userName: user.userName,
