@@ -9,60 +9,80 @@ router.post("/invest", async (req, res) => {
   try {
     const { campaign, investor, amount } = req.body;
 
-    //Validaciones que indican si todos los campos fueron diligenciados
     if (!campaign) {
-      return res.json({ ok: false, message: "Falta el ID de la campaña" });
-    } else if (!investor) {
-      return res.json({ ok: false, message: "Falta el ID del inversionista" });
-    } else if (!amount) {
-      return res.json({ ok: false, message: "Falta el monto a invertir" });
+      return res.status(400).json({ ok: false, message: "Falta el ID de la campaña" });
+    }
+    if (!investor) {
+      return res.status(400).json({ ok: false, message: "Falta el ID del inversionista" });
+    }
+    if (!amount) {
+      return res.status(400).json({ ok: false, message: "Falta el monto a invertir" });
     }
 
     const user = await User.findById(investor);
     if (!user) {
-      return res.json({ ok: false, message: "Usuario no encontrado" });
+      return res.status(404).json({ ok: false, message: "Usuario no encontrado" });
     }
     if (user.role !== "inversionista") {
-      return res.json({ ok: false, message: "El usuario no es inversionista" });
+      return res.status(400).json({ ok: false, message: "El usuario no es inversionista" });
     }
 
     if (amount <= 0) {
-        return res.json({ ok: false, message: "El monto debe ser mayor a 0" });
-    }
-
-    if (campaign.activeOrInactive !== "activo") {
-      return res.json({ok: false, message: "No se pueden hacer inversiones en campañas inactivas."});
+      return res.status(400).json({ ok: false, message: "El monto debe ser mayor a 0" });
     }
 
     const camp = await Campaign.findById(campaign);
     if (!camp) {
-      return res.json({ ok: false, message: "Campaña no encontrada" });
+      return res.status(404).json({ ok: false, message: "Campaña no encontrada" });
     }
-    
+
+    if (camp.activeOrInactive !== "activo") {
+      return res.status(400).json({
+        ok: false,
+        message: "No se pueden hacer inversiones en campañas inactivas."
+      });
+    }
+
     const investorName = user.userName;
     const campaignName = camp.campaignName;
-    
+
+    // Crear inversión
     const invest = await investmentSchema.create({
       campaign,
       investor,
       amount
     });
 
-      campaignName
-      campaignName
-    return res.json({ ok: true, id: invest._id, investorName: investorName, campaignName: campaignName, invest: invest }); //muestra ok y id de registro en la BD
+    // ACTUALIZACIÓN DEL collected
+    await Campaign.findByIdAndUpdate(
+      campaign,
+      { $inc: { collected: amount } }, // suma el monto invertido
+      { new: true }
+    );
+
+    return res.status(200).json({
+      ok: true,
+      id: invest._id,
+      investorName,
+      campaignName,
+      invest
+    });
+
   } catch (error) {
-    res.json({ ok: false, message: error.message });
+    console.error(error);
+    return res.status(500).json({ ok: false, message: error.message });
   }
 });
+
+
 
 //Visualización de todas las inversiones discriminada por campaña (para usuario administrador)
 router.get("/all", async (req, res) => {
   try {
-    const { adminId } = req.query;
-    if (!adminId) {
-      return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del administrador
-    }
+    // const { adminId } = req.query;
+    // if (!adminId) {
+    //   return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del administrador
+    // }
     const investments = await investmentSchema
       .find()
       .populate("campaign", "campaignName activeOrInactive owner")//Muestra el nombre de la campaña, estado y propietario de la campaña
@@ -146,7 +166,7 @@ router.put("/:id", async (req, res) => {
     }
 
     if (amount <= 0) {
-        return res.json({ ok: false, message: "El monto debe ser mayor a 0" });
+      return res.json({ ok: false, message: "El monto debe ser mayor a 0" });
     }
 
     const updated = await investmentSchema.findByIdAndUpdate(//Se actualiza la información
@@ -154,7 +174,7 @@ router.put("/:id", async (req, res) => {
       { $set: { amount, status } },
       { new: true }
     ).populate("campaign", "campaignName")//Muestra nomnbre de la campaña
-    .populate("investor", "userName email");//Muestra el nombre del inversionista
+      .populate("investor", "userName email");//Muestra el nombre del inversionista
 
     if (!updated) {
       return res.json({ ok: false, message: "Inversión no encontrada" });//Se valida que la inversión esté en la BD
@@ -168,16 +188,16 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/deleteInvestments/:id", async (req, res) => {
   try {
-    const { adminId } = req.query;
-    if (!adminId) {
-      return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del usuario
-    }
+    // const { adminId } = req.query;
+    // if (!adminId) {
+    //   return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del usuario
+    // }
 
-    const user = await User.findById(adminId);
-    if (!user) return res.json({ ok: false, message: "Usuario no encontrado" });//Se valida que el usuario esté en la BD
-    if (user.role !== "administrador") {
-      return res.json({ ok: false, message: "Solo los administradores pueden eliminar inversiones" });//Se valida que el ID sea de un administrador
-    }
+    // const user = await User.findById(adminId);
+    // if (!user) return res.json({ ok: false, message: "Usuario no encontrado" });//Se valida que el usuario esté en la BD
+    // if (user.role !== "administrador") {
+    //   return res.json({ ok: false, message: "Solo los administradores pueden eliminar inversiones" });//Se valida que el ID sea de un administrador
+    // }
 
     const { id } = req.params;
     const deleted = await investmentSchema.findByIdAndDelete(id);//Se elimina inversión
