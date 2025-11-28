@@ -188,16 +188,16 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/deleteInvestments/:id", async (req, res) => {
   try {
-    // const { adminId } = req.query;
-    // if (!adminId) {
-    //   return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del usuario
-    // }
+    const { adminId } = req.query;
+    if (!adminId) {
+      return res.json({ ok: false, message: "Falta el ID del administrador" });//Se valida que se haya ingresado el ID del usuario
+    }
 
-    // const user = await User.findById(adminId);
-    // if (!user) return res.json({ ok: false, message: "Usuario no encontrado" });//Se valida que el usuario esté en la BD
-    // if (user.role !== "administrador") {
-    //   return res.json({ ok: false, message: "Solo los administradores pueden eliminar inversiones" });//Se valida que el ID sea de un administrador
-    // }
+    const user = await User.findById(adminId);
+    if (!user) return res.json({ ok: false, message: "Usuario no encontrado" });//Se valida que el usuario esté en la BD
+    if (user.role !== "administrador") {
+      return res.json({ ok: false, message: "Solo los administradores pueden eliminar inversiones" });//Se valida que el ID sea de un administrador
+    }
 
     const { id } = req.params;
     const deleted = await investmentSchema.findByIdAndDelete(id);//Se elimina inversión
