@@ -89,6 +89,26 @@ router.get("/seeCampaigns", async (req, res) => {
   }
 });
 
+router.get("/seeCampaignsByOwner/:ownerId", async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+    // Buscar campañas del usuario
+    const campaigns = await campaignSchema
+      .find({ owner: ownerId })
+      .select("-articlesOfIncorporation.data")
+      .populate("owner", "userName role")
+      .sort({ createdAt: -1 });
+
+    return res.json({
+      ok: true,
+      total: campaigns.length,
+      campaigns,
+    });
+  } catch (error) {
+    return res.json({ ok: false, message: error.message });
+  }
+});
+
 router.get("/seePDFCampaign/:id/pdf", async (req, res) => {
   //Se busca el PDF por el ID de la campaña
   try {
